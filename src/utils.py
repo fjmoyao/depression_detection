@@ -4,6 +4,17 @@ import spacy
 import pandas as pd
 import os 
 from pathlib import Path
+import numpy as np
+from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier, AdaBoostClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.naive_bayes import GaussianNB
+from sklearn.model_selection import cross_val_score, RepeatedStratifiedKFold
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+from xgboost import XGBClassifier
 
 
 def clean_text(text, keep=None, remove_words=False):
@@ -38,6 +49,46 @@ def clean_text(text, keep=None, remove_words=False):
     text = re.sub(r'\s{2,}', ' ', text)
     text = text.lower()
     return text.strip()
+
+
+def remove_stopwords(doc, lemma=False, remove_stop=True):
+    """
+    Procesa un documento de SpaCy para eliminar las palabras vacías y/o aplicar lematización a sus tokens.
+
+    Esta función permite la eliminación opcional de palabras vacías (stopwords) y la lematización de los tokens en un objeto documento de SpaCy. El resultado es una cadena de texto única con los tokens procesados.
+
+    Parámetros:
+        doc (spacy.tokens.Doc): Un objeto documento de SpaCy que contiene los tokens a procesar.
+        lemma (bool): Si es True, los tokens serán lematizados. El valor predeterminado es False.
+        remove_stop (bool): Si es True, las palabras vacías serán eliminadas del documento. El valor predeterminado es True.
+
+    Devoluciones:
+        str: Una cadena que contiene el texto procesado basado en las opciones especificadas.
+
+    Ejemplos:
+        >>> import spacy
+        >>> nlp = spacy.load('en_core_web_sm')  # Asegúrate de tener el modelo cargado adecuadamente
+        >>> texto = "This is a sample text with several stopwords."
+        >>> doc = nlp(texto)
+        >>> print(remove_stopwords(doc, lemma=True, remove_stop=True))
+        "sample text several"
+
+        Este ejemplo muestra cómo eliminar palabras vacías y aplicar lematización a un texto en inglés.
+    """
+
+    if (remove_stop and lemma):
+        clean_txt = [token.lemma_ for token in doc if not token.is_stop]
+    elif remove_stop:
+        clean_txt = [token.text for token in doc if not token.is_stop]
+    elif lemma: 
+        clean_txt = [token.lemma_ for token in doc]
+    else:
+        clean_txt = [token.text for token in doc]
+
+    clean_txt = " ".join(clean_txt)
+    return clean_txt
+
+
 
 def calculate_pronoun_frequency(doc):
     """
@@ -245,5 +296,41 @@ def average_passive_sentences(doc):
                 break  # Solo cuenta una vez por oración
 
     return passive_count/ total_sentences
+
+def get_models():
+    """
+    Initializes a dictionary of machine learning models with some predefined parameters.
+    
+    Returns:
+        dict: A dictionary containing initialized models with their respective names.
+    """
+    models = {
+        'Logistic Regression': make_pipeline(StandardScaler(), LogisticRegression(solver='saga', C=70.0)),
+        'K-Nearest Neighbors': make_pipeline(StandardScaler(), KNeighborsClassifier()),
+        'Decision Tree': DecisionTreeClassifier(max_depth=1),
+        'SVM': make_pipeline(StandardScaler(), SVC()),
+        'Naive Bayes': make_pipeline(StandardScaler(), GaussianNB()),
+        'XGBoost': XGBClassifier(n_estimators=11, max_depth=1),
+        'Gradient Boosting': GradientBoostingClassifier(n_estimators=10),
+        'Random Forest': RandomForestClassifier(n_estimators=10),
+        'AdaBoost': AdaBoostClassifier(n_estimators=12)
+    }
+    return models
+
+def evaluate_model(model, X, y):
+    """
+    Evaluates a given model using cross-validation.
+    
+    Args:
+        model: The machine learning model to evaluate.
+        X: Feature dataset.
+        y: Target variable.
+    
+    Returns:
+        np.array: F1 scores from the cross-validation.
+    """
+    cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=4, random_state=1)
+    scores = cross_val_score(model, X, y, scoring='f1', cv=cv, n_jobs=-1, error_score='raise')
+    return scores
 
 
