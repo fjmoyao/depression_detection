@@ -1,0 +1,25 @@
+[project]
+name = "depression_detection"
+version = "0.1.5"
+description = "Default template for PDM package"
+authors = [
+    {name = "Francisco Moya", email = ""},
+]
+dependencies = [
+    "numpy>=1.26.4",
+    "pandas>=2.2.2",
+    "matplotlib>=3.8.4",
+    "spacy>=3.7.4",
+    "pathlib>=1.0.1",
+    "scipy>=1.13.0",
+    "scikit-learn>=1.4.2",
+    "shap>=0.45.0",
+    "ipykernel>=6.29.4",
+]
+requires-python = "==3.10.*"
+readme = "README.md"
+license = {text = "MIT"}
+
+
+[tool.pdm]
+distribution = false
