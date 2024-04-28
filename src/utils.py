@@ -15,6 +15,7 @@ from sklearn.model_selection import cross_val_score, RepeatedStratifiedKFold
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 from xgboost import XGBClassifier
+import joblib
 
 
 def clean_text(text, keep=None, remove_words=False):
@@ -124,9 +125,6 @@ def calculate_pronoun_frequency(doc):
         return pronoun_count / total_words
     else:
         return 0
-
-
-
 
 
 def avg_word_length(doc):
@@ -317,7 +315,7 @@ def get_models():
     }
     return models
 
-def evaluate_model(model, X, y):
+def evaluate_model(model, X, y,model_name=None,model_ext=None):
     """
     Evaluates a given model using cross-validation.
     
@@ -329,8 +327,15 @@ def evaluate_model(model, X, y):
     Returns:
         np.array: F1 scores from the cross-validation.
     """
+    data_path = Path(os.getcwd()).parent / "data" / "gold"
     cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=4, random_state=1)
     scores = cross_val_score(model, X, y, scoring='f1', cv=cv, n_jobs=-1, error_score='raise')
+
+    if (model_ext!=None) & (model_ext!=None):
+        extName = model_name + "_" + model_ext + ".pkl"
+        save_dir = data_path / extName
+        joblib.dump(model,save_dir)
+
     return scores
 
 
