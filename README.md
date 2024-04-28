@@ -1,7 +1,5 @@
 # Detección de Trastornos Mentales (Estrés) Utilizando NLP
 
-3197
-
 Este repositorio contiene un conjunto de modelos de aprendizaje automático y técnicas de procesamiento de lenguaje natural para la detección de signos de estrés en textos. El proyecto utiliza modelos avanzados como RoBERTa para clasificar textos que pueden indicar la presencia de estrés en individuos, basándose en sus expresiones escritas.
 
 ## Objetivo
@@ -11,10 +9,9 @@ El objetivo principal de este proyecto es desarrollar y afinar modelos de NLP ca
 ``` 
 /
 |- data/                  # Carpeta para datasets utilizados y generados durante el proyecto
-|- models/                # Modelos entrenados y scripts de entrenamiento
-|- notebooks/             # Jupyter notebooks para exploración de datos y resultados
-|- src/                   # Código fuente para el entrenamiento y evaluación de modelos
-|- requirements.txt       # Dependencias necesarias para replicar el entorno de desarrollo
+|- models/                # Modelos entrenados
+|- src/                   # Jupyter notebooks y código fuente para exploración de datos, entrenamiento y evaluación de modelos
+|- pyproject.toml         # Dependencias necesarias para replicar el entorno de desarrollo
 |- README.md              # Descripción del proyecto, instrucciones de uso y colaboración
 ``` 
 
@@ -28,4 +25,4 @@ Para instalar y configurar el entorno necesario para ejecutar los modelos y scri
    pdm install
    ```
 ## Uso 
-Para utilizar los modelos para detectar estrés en textos, puedes seguir los ejemplos proporcionados en los Jupyter notebooks dentro de la carpeta notebooks/. Para entrenar un modelo desde cero o utilizar un modelo preentrenado para inferencia, revisa los scripts en la carpeta **src/**.
+Para utilizar los modelos para detectar estrés en textos, puedes seguir los ejemplos proporcionados en los Jupyter notebooks dentro de la carpeta. Para entrenar un modelo desde cero o utilizar un modelo preentrenado para inferencia, revisa los scripts en la carpeta **src/**.

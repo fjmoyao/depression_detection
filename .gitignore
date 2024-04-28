@@ -100,7 +100,9 @@ venv.bak/
 .Trashes
 ehthumbs.db
 Thumbs.db
-
+#Others
 .pdm-python
 tests
 depression_detection
+models
+document

@@ -1,8 +1,8 @@
 
 import re
-import spacy 
+import spacy
 import pandas as pd
-import os 
+import os
 from pathlib import Path
 import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier, AdaBoostClassifier
@@ -22,7 +22,7 @@ def clean_text(text, keep=None, remove_words=False):
     """
     Limpia el texto eliminando caracteres no deseados, palabras abreviadas opcionales,
     normaliza los espacios y convierte el texto a minúsculas.
-    
+
     Args:
         text (str): El texto a procesar.
         keep (str, optional): Controla qué caracteres adicionales mantener. 
@@ -81,14 +81,13 @@ def remove_stopwords(doc, lemma=False, remove_stop=True):
         clean_txt = [token.lemma_ for token in doc if not token.is_stop]
     elif remove_stop:
         clean_txt = [token.text for token in doc if not token.is_stop]
-    elif lemma: 
+    elif lemma:
         clean_txt = [token.lemma_ for token in doc]
     else:
         clean_txt = [token.text for token in doc]
 
     clean_txt = " ".join(clean_txt)
     return clean_txt
-
 
 
 def calculate_pronoun_frequency(doc):
@@ -112,14 +111,15 @@ def calculate_pronoun_frequency(doc):
     0.36363636363636365
     """
     # Define la lista de pronombres personales
-    first_person_pronouns = {'i', 'me', 'my', 'mine',"myself"}
-    
+    first_person_pronouns = {'i', 'me', 'my', 'mine', "myself"}
+
     # Cuenta los pronombres
-    pronoun_count = sum(1 for token in doc if token.lemma_.lower() in first_person_pronouns)
-    
+    pronoun_count = sum(
+        1 for token in doc if token.lemma_.lower() in first_person_pronouns)
+
     # Calcula el numero total de palabras
     total_words = len(doc)
-    
+
     # Evita la division por cero
     if total_words > 0:
         return pronoun_count / total_words
@@ -151,6 +151,7 @@ def avg_word_length(doc):
     words = [token.text for token in doc if not token.is_punct]
     return sum(len(word) for word in words) / len(words) if words else 0
 
+
 def avg_sentence_length(doc):
     """
     Calcula la longitud promedio de las oraciones en un documento.
@@ -176,6 +177,7 @@ def avg_sentence_length(doc):
     if len(sentences) == 0:
         return 0  # Evita división por cero si no hay oraciones
     return sum(len(sentence) for sentence in sentences) / len(sentences)
+
 
 def lexical_diversity(doc):
     """
@@ -203,28 +205,30 @@ def lexical_diversity(doc):
     >>> print(lexical_diversity(doc))
     0.5
     """
-    words = [token.text for token in doc if not token.is_punct]  # Filtra los signos de puntuación
+    words = [
+        token.text for token in doc if not token.is_punct]  # Filtra los signos de puntuación
     types = set(words)  # Conjunto de tipos únicos de palabras
     if len(words) == 0:
         return 0  # Retorna 0 si no hay palabras para evitar división por cero
     return len(types) / len(words)  # Calcula la relación Tipo-Token
 
+
 def average_adv_adj(doc, kind=None):
     """
     Calcula el promedio de adverbios y adjetivos por oración en un documento procesado por SpaCy.
-    
+
     Esta función permite especificar si se desea calcular el promedio de solo adverbios, solo adjetivos,
     o ambos. Esto se hace mediante el parámetro 'kind'. Analiza el documento y cuenta los adverbios y
     adjetivos, luego divide este conteo por el número total de oraciones para obtener el promedio deseado.
-    
+
     Parámetros:
     - doc (spacy.tokens.doc.Doc): El documento procesado por SpaCy.
     - kind (str, opcional): Especifica el tipo de palabra para calcular el promedio. Puede ser 'adj' para
       adjetivos, 'adv' para adverbios, o None para ambos. El valor predeterminado es None.
-    
+
     Devuelve:
     - float: El promedio de adverbios, adjetivos o ambos por oración. Retorna 0 si no hay oraciones.
-    
+
     Ejemplos:
     >>> doc = nlp("The quick brown fox jumps over the lazy dog. It runs very quickly.")
     >>> print(average_adv_adj(doc))  # Promedio combinado
@@ -238,7 +242,7 @@ def average_adv_adj(doc, kind=None):
     adv_count = 0
     adj_count = 0
     total_sentences = len(list(doc.sents))
-    
+
     # Contar adverbios y adjetivos en el documento
     for token in doc:
         if token.pos_ == 'ADV':
@@ -259,11 +263,10 @@ def average_adv_adj(doc, kind=None):
         return (adv_count + adj_count) / total_sentences if total_sentences > 0 else 0
 
 
-
 def average_passive_sentences(doc):
     """
     Cuenta el número de oraciones pasivas en un documento procesado por SpaCy.
-    
+
     Una oración se considera pasiva si contiene un auxiliar de voz pasiva ('auxpass')
     o un sujeto pasivo ('nsubjpass') asociado con un verbo. La función recorre cada 
     oración y cada token dentro de la oración para identificar estas estructuras.
@@ -283,17 +286,18 @@ def average_passive_sentences(doc):
     """
 
     passive_count = 0
-    total_sentences =0
+    total_sentences = 0
 
     for sent in doc.sents:
-        total_sentences+=1
+        total_sentences += 1
         for token in sent:
             # Buscar estructuras de voz pasiva
             if token.dep_ == 'auxpass' or (token.dep_ == 'nsubjpass' and token.head.pos_ == 'VERB'):
                 passive_count += 1
                 break  # Solo cuenta una vez por oración
 
-    return passive_count/ total_sentences
+    return passive_count / total_sentences
+
 
 def get_models():
     """
@@ -305,7 +309,7 @@ def get_models():
 
     Devuelve:
         dict: Un diccionario que contiene los modelos inicializados con sus nombres respectivos.
-        
+
     Los modelos incluidos son:
     - Regresión Logística
     - K-Vecinos Más Cercanos
@@ -331,7 +335,8 @@ def get_models():
     }
     return models
 
-def evaluate_model(model, X, y,model_name=None,model_ext=None):
+
+def evaluate_model(model, X, y, model_name=None, model_ext=None):
     """
     Evalúa un modelo de aprendizaje automático utilizando validación cruzada.
 
@@ -350,11 +355,12 @@ def evaluate_model(model, X, y,model_name=None,model_ext=None):
     """
 
     # Define la ruta para guardar el modelo
-    data_path = Path(os.getcwd()).parent / "data" / "gold"
+    data_path = Path(os.getcwd()).parent / "models"
     # Configura los parámetros para la validación cruzada
     cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=4, random_state=1)
     # Realiza la validación cruzada y calcula las puntuaciones F1
-    scores = cross_val_score(model, X, y, scoring='f1', cv=cv, n_jobs=-1, error_score='raise')
+    scores = cross_val_score(model, X, y, scoring='f1',
+                             cv=cv, n_jobs=-1, error_score='raise')
 
     # Guarda el modelo si se proporcionan los nombres
     if model_name is not None and model_ext is not None:
@@ -363,5 +369,3 @@ def evaluate_model(model, X, y,model_name=None,model_ext=None):
         joblib.dump(model, save_dir)
 
     return scores
-
-
