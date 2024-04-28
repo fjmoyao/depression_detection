@@ -81,7 +81,7 @@ venv.bak/
 .mypy_cache/
 
 # Data directory
-/data/
+#/data/
 
 # Virtual Studio Code settings
 .vscode/
@@ -104,5 +104,4 @@ Thumbs.db
 .pdm-python
 tests
 depression_detection
-models
 document
