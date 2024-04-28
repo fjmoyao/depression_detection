@@ -297,10 +297,26 @@ def average_passive_sentences(doc):
 
 def get_models():
     """
-    Initializes a dictionary of machine learning models with some predefined parameters.
-    
-    Returns:
-        dict: A dictionary containing initialized models with their respective names.
+    Inicializa un diccionario de modelos de aprendizaje automático con parámetros predefinidos.
+
+    Esta función crea y configura varios modelos populares de aprendizaje automático, cada uno con
+    configuraciones iniciales específicas. Los modelos se crean utilizando las bibliotecas scikit-learn
+    y XGBoost, y se ajustan mediante pipelines donde es necesario para estandarizar los datos.
+
+    Devuelve:
+        dict: Un diccionario que contiene los modelos inicializados con sus nombres respectivos.
+        
+    Los modelos incluidos son:
+    - Regresión Logística
+    - K-Vecinos Más Cercanos
+    - Árbol de Decisión
+    - SVM
+    - Naive Bayes
+    - XGBoost
+    - Gradient Boosting
+    - Random Forest
+    - AdaBoost
+
     """
     models = {
         'Logistic Regression': make_pipeline(StandardScaler(), LogisticRegression(solver='saga', C=70.0)),
@@ -317,24 +333,34 @@ def get_models():
 
 def evaluate_model(model, X, y,model_name=None,model_ext=None):
     """
-    Evaluates a given model using cross-validation.
-    
-    Args:
-        model: The machine learning model to evaluate.
-        X: Feature dataset.
-        y: Target variable.
-    
-    Returns:
-        np.array: F1 scores from the cross-validation.
+    Evalúa un modelo de aprendizaje automático utilizando validación cruzada.
+
+    Parámetros:
+        model (sklearn.base.BaseEstimator): Modelo de aprendizaje automático a evaluar.
+        X (array-like): Conjunto de datos de características utilizadas para la evaluación del modelo.
+        y (array-like): Variable objetivo correspondiente a X.
+        model_name (str, opcional): Nombre base para el archivo al guardar el modelo entrenado.
+        model_ext (str, opcional): Extensión adicional para el nombre del archivo al guardar el modelo.
+
+    Devoluciones:
+        np.array: Puntuaciones F1 obtenidas de la validación cruzada.
+
+    Guarda el modelo en un archivo si `model_name` y `model_ext` son proporcionados. El archivo
+    se guardará en el directorio 'data/gold' del directorio padre del directorio de trabajo actual.
     """
+
+    # Define la ruta para guardar el modelo
     data_path = Path(os.getcwd()).parent / "data" / "gold"
+    # Configura los parámetros para la validación cruzada
     cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=4, random_state=1)
+    # Realiza la validación cruzada y calcula las puntuaciones F1
     scores = cross_val_score(model, X, y, scoring='f1', cv=cv, n_jobs=-1, error_score='raise')
 
-    if (model_ext!=None) & (model_ext!=None):
-        extName = model_name + "_" + model_ext + ".pkl"
+    # Guarda el modelo si se proporcionan los nombres
+    if model_name is not None and model_ext is not None:
+        extName = f"{model_name}_{model_ext}.pkl"
         save_dir = data_path / extName
-        joblib.dump(model,save_dir)
+        joblib.dump(model, save_dir)
 
     return scores
 
