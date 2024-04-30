@@ -17,6 +17,8 @@ from sklearn.pipeline import make_pipeline
 from xgboost import XGBClassifier
 import joblib
 
+#nlp = spacy.load('en_core_web_sm')
+#list_stop_words = stop_words = nlp.Defaults.stop_words
 
 def clean_text(text, keep=None, remove_words=False):
     """
@@ -51,6 +53,19 @@ def clean_text(text, keep=None, remove_words=False):
     text = text.lower()
     return text.strip()
 
+def word_freq(doc):
+    frecuencias ={}
+    # Contar frecuencias de cada token que sea una palabra
+    for token in doc:
+        if token.is_alpha:  # Asegurarse de que el token sea alfabético
+            word = token.text.lower()  # Convertir a minúsculas para normalizar
+            if word in frecuencias:
+                frecuencias[word] += 1
+            else:
+                frecuencias[word] = 1
+    #frecuencias =    pd.DataFrame.from_dict(frecuencias, orient="index").reset_index()
+    #frecuencias.columns= ["word","count"]
+    return frecuencias #.sort_values(ascending=False)
 
 def remove_stopwords(doc, lemma=False, remove_stop=True):
     """
@@ -76,11 +91,12 @@ def remove_stopwords(doc, lemma=False, remove_stop=True):
 
         Este ejemplo muestra cómo eliminar palabras vacías y aplicar lematización a un texto en inglés.
     """
+    first_person_pronouns = ['i', 'me', 'my', 'mine', "myself"]
 
     if (remove_stop and lemma):
-        clean_txt = [token.lemma_ for token in doc if not token.is_stop]
+        clean_txt = [token.lemma_ for token in doc if ((not token.is_stop) | (token.text in first_person_pronouns))]
     elif remove_stop:
-        clean_txt = [token.text for token in doc if not token.is_stop]
+        clean_txt = [token.text for token in doc if ((not token.is_stop) | (token.text in first_person_pronouns))]
     elif lemma:
         clean_txt = [token.lemma_ for token in doc]
     else:
