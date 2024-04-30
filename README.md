@@ -24,5 +24,6 @@ Para instalar y configurar el entorno necesario para ejecutar los modelos y scri
    ```
    pdm install
    ```
+3. instala el modelo de Spacy python -m spacy download en_core_web_sm
 ## Uso 
 Para utilizar los modelos para detectar estrés en textos, puedes seguir los ejemplos proporcionados en los Jupyter notebooks dentro de la carpeta. Para entrenar un modelo desde cero o utilizar un modelo preentrenado para inferencia, revisa los scripts en la carpeta **src/**.
