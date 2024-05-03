@@ -1,27 +1,27 @@
 import streamlit as st
 import utils_app
 # Configure the Streamlit page
-st.set_page_config(page_title="Inferencia de Estrés con RoBERTa", layout="wide")
+st.set_page_config(page_title="Stress Inference with RoBERTa", layout="wide")
 
 def main():
     # Title and introduction of the project
-    st.title("Bienvenido al Detector de Estrés con RoBERTa")
+    st.title("Welcome to the Stress Detector with RoBERTa")
     st.write("""
-        Esta aplicación utiliza un modelo avanzado de procesamiento de lenguaje natural para analizar textos y determinar 
-        niveles de estrés. A continuación, puedes explorar cómo funciona el modelo y probarlo con tus propios textos.
+        This application uses an advanced natural language processing model to analyze texts and determine 
+        stress levels. Below, you can explore how the model works and test it with your own texts.
     """)
 
     # Explanation of the project functionalities
-    st.header("Funcionalidades")
+    st.header("Functionalities")
     st.write("""
-        - **Análisis de Texto:** Ingrese cualquier texto y el modelo determinará si el contenido expresa estrés.
-        - **Resultados Instantáneos:** Obtén resultados en segundos.
-        - **Interfaz Sencilla:** Una interfaz fácil de usar que no requiere conocimientos técnicos.
+        - **Text Analysis:** Enter any text and the model will determine if the content expresses stress.
+        - **Instant Results:** Get results in seconds.
+        - **Simple Interface:** An easy-to-use interface that does not require technical knowledge.
     """)
 
-    text = st.text_area("Ingrese el texto para analizar:", height=15)
+    text = st.text_area("Enter the text for analysis:", height=15)
     
-    if st.button("Analizar"):
+    if st.button("Analyze"):
         if text:
             output = utils_app.query({"inputs": text,})
             result = utils_app.get_label_score(output)
@@ -29,12 +29,11 @@ def main():
             label = list(result.keys())[0]
             label = str(label).replace("1","Stress").replace("0","Neutral")
             
-            st.write("Resultado de la Predicción:")
+            st.write("Prediction Result:")
             st.write(label)
 
         else:
-            st.error("Por favor, ingrese algún texto para analizar.")
-
+            st.error("Please enter some text for analysis.")
 
 if __name__ == "__main__":
     main()
