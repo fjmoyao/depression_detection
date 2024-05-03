@@ -20,10 +20,21 @@ El objetivo principal de este proyecto es desarrollar y afinar modelos de NLP ca
 Para instalar y configurar el entorno necesario para ejecutar los modelos y scripts, sigue estos pasos:
 
 1. Clona este repositorio:
-2. Instala las dependencias:
+2. Instala las dependencias, bien sea con pdm o con pip:
    ```
    pdm install
+   ```
+      ```
+   pip install -r requirements.txt
    ```
 3. instala el modelo de Spacy python -m spacy download en_core_web_sm
 ## Uso 
 Para utilizar los modelos para detectar estrés en textos, puedes seguir los ejemplos proporcionados en los Jupyter notebooks dentro de la carpeta. Para entrenar un modelo desde cero o utilizar un modelo preentrenado para inferencia, revisa los scripts en la carpeta **src/**.
+
+1. Ejecutar "Procesamiento de Datos.ipynb" 
+2. Ejecutar "Análisis Explorativo de Datos.ipynb"
+3. Ejecutar "EDA hipotesis testing.ipynb"
+4. Ejecutar "Feature Exploration.ipynb"
+5. Ejecutar "ModelEval-TFIDF.ipynb"
+6. Ejecutar "ModelEval-RoBERTa.ipynb"
+7. Ejecutar "Evaluacion de modelos.ipynb"
