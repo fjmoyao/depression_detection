@@ -38,3 +38,5 @@ Para utilizar los modelos para detectar estrés en textos, puedes seguir los eje
 5. Ejecutar "ModelEval-TFIDF.ipynb"
 6. Ejecutar "ModelEval-RoBERTa.ipynb"
 7. Ejecutar "Evaluacion de modelos.ipynb"
+
+Para hacer inferencia directamente ve a inferencia.ipynb debes asegurarte de crear un archivo .env con el API TOKEN de hugging face
