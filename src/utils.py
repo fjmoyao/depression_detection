@@ -489,4 +489,4 @@ def make_prediction(text, model, tokenizer, device):
         probabilities = torch.softmax(logits, dim=-1)
         predicted_class = torch.argmax(probabilities, dim=-1)
 
-    return probabilities.cpu().numpy(), predicted_class.cpu().numpy()
+    return probabilities.cpu().numpy()[0], predicted_class.cpu().numpy()[0]
