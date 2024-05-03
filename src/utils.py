@@ -16,6 +16,9 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 from xgboost import XGBClassifier
 import joblib
+import torch
+from torch.optim import AdamW
+from sklearn.metrics import f1_score
 
 #nlp = spacy.load('en_core_web_sm')
 #list_stop_words = stop_words = nlp.Defaults.stop_words
@@ -385,3 +388,105 @@ def evaluate_model(model, X, y, model_name=None, model_ext=None):
         joblib.dump(model, save_dir)
 
     return scores
+
+
+
+def train_and_evaluate(model, train_loader, val_loader, device, num_epochs=5):
+    optimizer = AdamW(model.parameters(), lr=1e-5)
+    best_f1 = 0
+
+    for epoch in range(num_epochs):
+        model.train()
+        train_loss = 0
+        for batch in train_loader:
+            optimizer.zero_grad()
+            input_ids = batch['input_ids'].to(device)
+            attention_mask = batch['attention_mask'].to(device)
+            labels = batch['labels'].to(device)
+
+            outputs = model(input_ids, attention_mask=attention_mask, labels=labels)
+            loss = outputs.loss
+            train_loss += loss.item()
+            loss.backward()
+            optimizer.step()
+
+        train_loss /= len(train_loader)
+
+        # Evaluación
+        model.eval()
+        val_true, val_preds = [], []
+        with torch.no_grad():
+            for batch in val_loader:
+                input_ids = batch['input_ids'].to(device)
+                attention_mask = batch['attention_mask'].to(device)
+                labels = batch['labels'].to(device)
+                
+                outputs = model(input_ids, attention_mask=attention_mask, labels=labels)
+                logits = outputs.logits
+                predictions = torch.argmax(logits, dim=-1)
+
+                val_true.extend(labels.cpu().numpy())
+                val_preds.extend(predictions.cpu().numpy())
+
+        val_f1 = f1_score(val_true, val_preds, average='binary')
+        if val_f1 > best_f1:
+            best_f1 = val_f1  # Actualizar el mejor F1 score visto hasta ahora
+
+        print(f'Epoch {epoch+1}/{num_epochs}, Train Loss: {train_loss:.4f}, Validation F1: {val_f1:.4f}')
+
+    return best_f1
+
+
+def save_model_and_tokenizer(model, tokenizer, save_directory):
+    """
+    Save the fine-tuned model and tokenizer to a specified directory.
+
+    Args:
+        model: The trained RoBERTa model (e.g., an instance of RobertaForSequenceClassification).
+        tokenizer: The tokenizer used with the RoBERTa model.
+        save_directory (str): The path to the directory where the model and tokenizer will be saved.
+
+    Returns:
+        None
+    """
+    # Create the directory if it does not exist
+    import os
+    if not os.path.exists(save_directory):
+        os.makedirs(save_directory)
+
+    # Save the model
+    model.save_pretrained(save_directory)
+    
+    # Save the tokenizer associated with the model
+    tokenizer.save_pretrained(save_directory)
+
+    print(f"Model and tokenizer have been saved to {save_directory}") 
+
+
+def prepare_text_for_inference(text, tokenizer, max_length=128):
+    encoding = tokenizer.encode_plus(
+        text,
+        add_special_tokens=True,  # Agrega los tokens especiales para RoBERTa '[CLS]' y '[SEP]'
+        max_length=max_length,    # Trunca o rellena el texto hasta la longitud máxima
+        padding='max_length',     # Rellena hasta `max_length`
+        truncation=True,          # Trunca a `max_length` si el texto es más largo
+        return_attention_mask=True,
+        return_tensors='pt',      # Retorna tensores de PyTorch
+    )
+    return encoding['input_ids'], encoding['attention_mask']
+
+
+def make_prediction(text, model, tokenizer, device):
+    model.eval()  # Pone el modelo en modo evaluación
+
+    input_ids, attention_mask = prepare_text_for_inference(text, tokenizer)
+    input_ids = input_ids.to(device)
+    attention_mask = attention_mask.to(device)
+
+    with torch.no_grad():  # Desactiva el cálculo de gradientes para inferencia
+        outputs = model(input_ids, attention_mask=attention_mask)
+        logits = outputs.logits
+        probabilities = torch.softmax(logits, dim=-1)
+        predicted_class = torch.argmax(probabilities, dim=-1)
+
+    return probabilities.cpu().numpy(), predicted_class.cpu().numpy()
