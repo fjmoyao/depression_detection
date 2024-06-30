@@ -72,14 +72,14 @@ def word_freq(doc):
 
 def remove_stopwords(doc, lemma=False, remove_stop=True):
     """
-    Procesa un documento de SpaCy para eliminar las palabras vacías y/o aplicar lematización a sus tokens.
+    Procesa un documento de SpaCy para eliminar las palabras de parada y/o aplicar lematización a sus tokens.
 
-    Esta función permite la eliminación opcional de palabras vacías (stopwords) y la lematización de los tokens en un objeto documento de SpaCy. El resultado es una cadena de texto única con los tokens procesados.
+    Esta función permite la eliminación opcional de palabras de parada (stopwords) y la lematización de los tokens en un objeto documento de SpaCy. El resultado es una cadena de texto única con los tokens procesados.
 
     Parámetros:
         doc (spacy.tokens.Doc): Un objeto documento de SpaCy que contiene los tokens a procesar.
         lemma (bool): Si es True, los tokens serán lematizados. El valor predeterminado es False.
-        remove_stop (bool): Si es True, las palabras vacías serán eliminadas del documento. El valor predeterminado es True.
+        remove_stop (bool): Si es True, las stopwords serán eliminadas del documento. El valor predeterminado es True.
 
     Devoluciones:
         str: Una cadena que contiene el texto procesado basado en las opciones especificadas.
@@ -415,6 +415,7 @@ def train_and_evaluate(model, train_loader, val_loader, device, num_epochs=5):
         # Evaluación
         model.eval()
         val_true, val_preds = [], []
+        val_loss = 0
         with torch.no_grad():
             for batch in val_loader:
                 input_ids = batch['input_ids'].to(device)
@@ -422,17 +423,22 @@ def train_and_evaluate(model, train_loader, val_loader, device, num_epochs=5):
                 labels = batch['labels'].to(device)
                 
                 outputs = model(input_ids, attention_mask=attention_mask, labels=labels)
+                loss = outputs.loss
+                val_loss += loss.item()
+        
+
                 logits = outputs.logits
                 predictions = torch.argmax(logits, dim=-1)
 
                 val_true.extend(labels.cpu().numpy())
                 val_preds.extend(predictions.cpu().numpy())
+            val_loss /= len(val_loader)
 
         val_f1 = f1_score(val_true, val_preds, average='binary')
         if val_f1 > best_f1:
             best_f1 = val_f1  # Actualizar el mejor F1 score visto hasta ahora
 
-        print(f'Epoch {epoch+1}/{num_epochs}, Train Loss: {train_loss:.4f}, Validation F1: {val_f1:.4f}')
+        print(f'Epoch {epoch+1}/{num_epochs}, Train Loss: {train_loss:.4f}, val Loss: {val_loss:.4f}, Validation F1: {val_f1:.4f}')
 
     return best_f1
 
